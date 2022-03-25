@@ -4,15 +4,13 @@ Config.Core = "QBCore:GetObject"
 
 Config.Locale       				= 'en' 
 
+Config.PoliceJobName				= 'police' --Change with your police job name
 
 Config.ServiceExtensionOnEscape		= 8
 
-
 Config.ServiceLocation 				= {x =  170.43, y = -990.7, z = 30.09}
 
-
 Config.ReleaseLocation				= {x = 427.33, y = -979.51, z = 30.2}
-
 
 Config.ServiceLocations = {
 	{ type = "cleaning", coords = vector3(170.0, -1006.0, 29.34) },
