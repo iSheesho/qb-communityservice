@@ -23,7 +23,7 @@ QBCore.Commands.Add("endcomserv", "End Community Service", { { name = "id", help
 end, "admin")
 
 
-QBCore.Commands.Add("pcomserv", _U('give_player_community'), { { name = "id", help = _U('target_id') } }, false, function(source, args, user)
+QBCore.Commands.Add("pcomserv", _U('give_player_community'), {{name = "id", help = _U('target_id')}, {name = "actions", help = _U('action_count_suggested')}}, false, function(source, args, user)
     local Player = QBCore.Functions.GetPlayer(source)
 
     local job = Player.PlayerData.job.name
