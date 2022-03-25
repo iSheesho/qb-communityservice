@@ -1,29 +1,42 @@
 local QBCore = exports['qb-core']:GetCoreObject()
 
 
-QBCore.Commands.Add("comserv", _U('give_player_community'), {{name = "id", help = _U('target_id')}, {name = "actions", help = _U('action_count_suggested')}}, false, function(source, args, user)
+QBCore.Commands.Add("servicios", _U('give_player_community'), {{name = "id", help = _U('target_id')}, {name = "actions", help = _U('action_count_suggested')}}, false, function(source, args, user)
 	local Player = QBCore.Functions.GetPlayer(source)
 	if args[1] and GetPlayerName(args[1]) ~= nil and tonumber(args[2]) then
 		TriggerEvent('qb-communityservice:sendToCommunityService', tonumber(args[1]), tonumber(args[2]))
 	else
-		TriggerClientEvent('chat:addMessage', source, { args = { _U('system_msn'), _U('invalid_player_id_or_actions') } } )
+		local time = os.date(Config.DateFormat)
+		TriggerClientEvent('chat:addMessage', -1, {
+			template = '<div class="chat-message server-msg"><i class="fas fa-exclamation-circle"></i> <b><span style="color: #cc3d3d;">[FISCALIA]</span>&nbsp;<span class="time">{1}</span></b><div class="message">{0}</div></div>',
+			args = {_U('invalid_player_id_or_actions'), time }
+		})
 	end
 end,"admin")
 
-QBCore.Commands.Add("endcomserv", "End Community Service", { { name = "id", help = _U('target_id') } }, false, function(source, args, user)
+QBCore.Commands.Add("endservicios", "Cancelar servucuis comunutarios", { { name = "id", help = _U('target_id') } }, false, function(source, args, user)
     local Player = QBCore.Functions.GetPlayer(source)
 
     if args[1] then
         if args[1] ~= nil then
             TriggerEvent('qb-communityservice:endCommunityServiceCommand', tonumber(args[1]))
         else
-            TriggerClientEvent('chat:addMessage', source, { args = { _U('system_msn'), _U('invalid_player_id') } })
+		local time = os.date(Config.DateFormat)
+		TriggerClientEvent('chat:addMessage', -1, {
+			template = '<div class="chat-message server-msg"><i class="fas fa-exclamation-circle"></i> <b><span style="color: #cc3d3d;">[FISCALIA]</span>&nbsp;<span class="time">{1}</span></b><div class="message">{0}</div></div>',
+			args = {_U('invalid_player_id'), time }
+		})
         end      
     end
 end, "admin")
 
 
 -- unjail after time served
+RegisterServerEvent('qb-communityservice:finishCommunityService')
+AddEventHandler('qb-communityservice:finishCommunityService', function()
+	releaseFromCommunityService(source)
+end)
+
 RegisterServerEvent('qb-communityservice:finishCommunityService')
 AddEventHandler('qb-communityservice:finishCommunityService', function()
 	releaseFromCommunityService(source)
@@ -42,12 +55,12 @@ AddEventHandler('qb-communityservice:completeService', function()
 	local _source = source
 	local identifier = QBCore.Functions.GetPlayer(_source).PlayerData.citizenid
 
-		exports['oxmysql']:execute('SELECT * FROM communityservice WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 
 		if result[1] then
-				exports['oxmysql']:execute('UPDATE communityservice SET actions_remaining = actions_remaining - 1 WHERE identifier = @identifier', {
+				MySQL.Async.fetchAll('UPDATE communityservice SET actions_remaining = actions_remaining - 1 WHERE identifier = @identifier', {
 				['@identifier'] = identifier
 			})
 		else
@@ -65,12 +78,12 @@ AddEventHandler('qb-communityservice:extendService', function()
 	local _source = source
 	local identifier = QBCore.Functions.GetPlayer(_source).PlayerData.citizenid
 
-		exports['oxmysql']:execute('SELECT * FROM communityservice WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 
 		if result[1] then
-				exports['oxmysql']:execute('UPDATE communityservice SET actions_remaining = actions_remaining + @extension_value WHERE identifier = @identifier', {
+			MySQL.Async.fetchAll('UPDATE communityservice SET actions_remaining = actions_remaining + @extension_value WHERE identifier = @identifier', {
 				['@identifier'] = identifier,
 				['@extension_value'] = Config.ServiceExtensionOnEscape
 			})
@@ -84,36 +97,41 @@ end)
 
 RegisterServerEvent('qb-communityservice:sendToCommunityService')
 AddEventHandler('qb-communityservice:sendToCommunityService', function(target, actions_count)
-
-	local identifier = QBCore.Functions.GetPlayer(target).PlayerData.citizenid
-
-		exports['oxmysql']:execute('SELECT * FROM communityservice WHERE identifier = @identifier', {
+		local identifier = QBCore.Functions.GetPlayer(target).PlayerData.citizenid
+		MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
+		print("RTM1")
 		if result[1] then
-				exports['oxmysql']:execute('UPDATE communityservice SET actions_remaining = @actions_remaining WHERE identifier = @identifier', {
+			MySQL.Async.fetchAll('UPDATE communityservice SET actions_remaining = @actions_remaining WHERE identifier = @identifier', {
 				['@identifier'] = identifier,
 				['@actions_remaining'] = actions_count
 			})
+			
 		else
-				exports['oxmysql']:execute('INSERT INTO communityservice (identifier, actions_remaining) VALUES (@identifier, @actions_remaining)', {
+			MySQL.Async.fetchAll('INSERT INTO communityservice (identifier, actions_remaining) VALUES (@identifier, @actions_remaining)', {
 				['@identifier'] = identifier,
 				['@actions_remaining'] = actions_count
 			})
 		end
 	end)
 
-	TriggerClientEvent('chat:addMessage', -1, { args = { _U('judge'), _U('comserv_msg', GetPlayerName(target), actions_count) }, color = { 147, 196, 109 } })
+	TriggerClientEvent('chat:addMessage', -1, {
+		template = '<div class="chat-message server-msg"><i class="fas fa-exclamation-circle"></i> <b><span style="color: #fff;">[Servicio comunitario]</span>&nbsp;</b><div class="message">{1}</div></div>',
+		args = { _U('judge'), _U('comserv_msg', GetPlayerName(target), actions_count, time) }
+	})
+
 	TriggerClientEvent('qb-communityservice:inCommunityService', target, actions_count)
 
 end)
+
 
 RegisterServerEvent('qb-communityservice:checkIfSentenced')
 AddEventHandler('qb-communityservice:checkIfSentenced', function()
 	local _source = source -- cannot parse source to client trigger for some weird reason
 	local identifier = QBCore.Functions.GetPlayer(_source).PlayerData.citizenid -- get steam identifier
-
-		exports['oxmysql']:execute('SELECT * FROM communityservice WHERE identifier = @identifier', {
+	print(identifier)
+	MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 		if result[1] ~= nil and result[1].actions_remaining > 0 then
@@ -125,11 +143,11 @@ end)
 function releaseFromCommunityService(target)
 
 	local identifier = QBCore.Functions.GetPlayer(target).PlayerData.citizenid
-		exports['oxmysql']:execute('SELECT * FROM communityservice WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function(result)
 		if result[1] then
-				exports['oxmysql']:execute('DELETE from communityservice WHERE identifier = @identifier', {
+				MySQL.Async.execute('DELETE from communityservice WHERE identifier = @identifier', {
 				['@identifier'] = identifier
 			})
 
