@@ -185,18 +185,19 @@ Citizen.CreateThread(function()
 							local netid = ObjToNet(vassouspawn)
 						
 							
-									TaskStartScenarioInPlace(PlayerPedId(), "world_human_janitor", 0, false)
-							 		AttachEntityToEntity(vassouspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,360.0,360.0,0.0,1,1,0,1,0,1)
-							 		vassour_net = netid
+							AttachEntityToEntity(vassouspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,360.0,360.0,0.0,1,1,0,1,0,1)
+							vassour_net = netid
+							RequestAnimDict("amb@world_human_janitor@male@idle_a")
+							TaskPlayAnim(PlayerPedId(), "amb@world_human_janitor@male@idle_a", "idle_a", 8.0, -8.0, -1, 0, 0, false, false, false)
 
 
-									Wait(10000)
+							Wait(10000)
 									
-									disable_actions = false
-									DetachEntity(NetToObj(vassour_net), 1, 1)
-									DeleteEntity(NetToObj(vassour_net))
-									vassour_net = nil
-									ClearPedTasks(player)
+							disable_actions = false
+							DetachEntity(NetToObj(vassour_net), 1, 1)
+							DeleteEntity(NetToObj(vassour_net))
+							vassour_net = nil
+							ClearPedTasks(player)
 								
 
 						end
