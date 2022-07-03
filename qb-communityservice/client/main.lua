@@ -34,10 +34,9 @@ Citizen.CreateThread(function()
 	end
 end)
 
-
-Citizen.CreateThread(function()
-	Citizen.Wait(3000) --Wait for oxmysql
-	TriggerServerEvent('qb-communityservice:checkIfSentenced') --PUT THIS IN SPAWN SCRIPT
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
+AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+	TriggerServerEvent('qb-communityservice:checkIfSentenced') -- Check if the user is sentence when the player is loaded.
 end)
 
 SetTimeout = function(msec, cb)
@@ -149,85 +148,84 @@ Round = function(value, numDecimalPlaces)
 	end
 end
 Citizen.CreateThread(function()
-	
-	
-	while true do
-	repeat	
-		Citizen.Wait(1)
-		local player = PlayerPedId()
-		local pCoords    = GetEntityCoords(player)
-		if actionsRemaining > 0 and isSentenced then
-			draw2dText( _U('remaining_msg', Round(actionsRemaining)), { 0.175, 0.955 } )
-			DrawAvailableActions()
-			DisableViolentActions()
+    
+    
+    while true do
+    repeat    
+        Citizen.Wait(1)
+        local player = PlayerPedId()
+        local pCoords    = GetEntityCoords(player)
+        if actionsRemaining > 0 and isSentenced then
+            draw2dText( _U('remaining_msg', Round(actionsRemaining)), { 0.175, 0.955 } )
+            DrawAvailableActions()
+            DisableViolentActions()
 
-			
+            
 
-			for i = 1, #availableActions do
-				local distance = GetDistanceBetweenCoords(pCoords, availableActions[i].coords, true)
+            for i = 1, #availableActions do
+                local distance = GetDistanceBetweenCoords(pCoords, availableActions[i].coords, true)
 
-				if distance < 1.5 then
-					DisplayHelpText(_U('press_to_start'))
-
-
-					if(IsControlJustReleased(1, 38))then
-						tmp_action = availableActions[i]
-						RemoveAction(tmp_action)
-						FillActionTable(tmp_action)
-						disable_actions = true
-
-						TriggerServerEvent('qb-communityservice:completeService')
-						actionsRemaining = actionsRemaining - 1
-
-						if (tmp_action.type == "cleaning") then
-							local cSCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()), 0.0, 0.0, -5.0)
-							local vassouspawn = CreateObject(GetHashKey(vassoumodel), cSCoords.x, cSCoords.y, cSCoords.z, 1, 1, 1)
-							local netid = ObjToNet(vassouspawn)
-						
-							
-							AttachEntityToEntity(vassouspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,360.0,360.0,0.0,1,1,0,1,0,1)
-							vassour_net = netid
-							RequestAnimDict("amb@world_human_janitor@male@idle_a")
-							TaskPlayAnim(PlayerPedId(), "amb@world_human_janitor@male@idle_a", "idle_a", 8.0, -8.0, -1, 0, 0, false, false, false)
+                if distance < 1.5 then
+                    DisplayHelpText(_U('press_to_start'))
 
 
-							Wait(10000)
-									
-							disable_actions = false
-							DetachEntity(NetToObj(vassour_net), 1, 1)
-							DeleteEntity(NetToObj(vassour_net))
-							vassour_net = nil
-							ClearPedTasks(player)
-								
+                    if(IsControlJustReleased(1, 38))then
+                        tmp_action = availableActions[i]
+                        RemoveAction(tmp_action)
+                        FillActionTable(tmp_action)
+                        disable_actions = true
 
-						end
+                        TriggerServerEvent('qb-communityservice:completeService')
+                        actionsRemaining = actionsRemaining - 1
 
-						if (tmp_action.type == "gardening") then
-							local cSCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()), 0.0, 0.0, -5.0)
-							local spatulaspawn = CreateObject(GetHashKey(spatulamodel), cSCoords.x, cSCoords.y, cSCoords.z, 1, 1, 1)
-							local netid = ObjToNet(spatulaspawn)
+                        if (tmp_action.type == "cleaning") then
+                            local cSCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()), 0.0, 0.0, -5.0)
+                            local vassouspawn = CreateObject(GetHashKey(vassoumodel), cSCoords.x, cSCoords.y, cSCoords.z, 1, 1, 1)
+                            local netid = ObjToNet(vassouspawn)
+                        
+                            
+                                    TaskStartScenarioInPlace(PlayerPedId(), "world_human_janitor", 0, false)
+                                     AttachEntityToEntity(vassouspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,360.0,360.0,0.0,1,1,0,1,0,1)
+                                     vassour_net = netid
 
-							TaskStartScenarioInPlace(PlayerPedId(), "world_human_gardener_plant", 0, false)
-							AttachEntityToEntity(spatulaspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,190.0,190.0,-50.0,1,1,0,1,0,1)
-							spatula_net = netid
 
-							Wait(10000)
-								disable_actions = false
-								DetachEntity(NetToObj(spatula_net), 1, 1)
-								DeleteEntity(NetToObj(spatula_net))
-								spatula_net = nil
-								ClearPedTasks(PlayerPedId())
-							
-						end
+                                    Wait(10000)
+                                    
+                                    disable_actions = false
+                                    DetachEntity(NetToObj(vassour_net), 1, 1)
+                                    DeleteEntity(NetToObj(vassour_net))
+                                    vassour_net = nil
+                                    ClearPedTasks(player)
+                                
 
-						
-					end
-				end
-			end
-		else
-			Citizen.Wait(1000)
-		end
-	until actionsRemaining == 0
+                        end
+
+                        if (tmp_action.type == "gardening") then
+                            local cSCoords = GetOffsetFromEntityInWorldCoords(GetPlayerPed(PlayerId()), 0.0, 0.0, -5.0)
+                            local spatulaspawn = CreateObject(GetHashKey(spatulamodel), cSCoords.x, cSCoords.y, cSCoords.z, 1, 1, 1)
+                            local netid = ObjToNet(spatulaspawn)
+
+                            TaskStartScenarioInPlace(PlayerPedId(), "world_human_gardener_plant", 0, false)
+                            AttachEntityToEntity(spatulaspawn,GetPlayerPed(PlayerId()),GetPedBoneIndex(GetPlayerPed(PlayerId()), 28422),-0.005,0.0,0.0,190.0,190.0,-50.0,1,1,0,1,0,1)
+                            spatula_net = netid
+
+                            Wait(10000)
+                                disable_actions = false
+                                DetachEntity(NetToObj(spatula_net), 1, 1)
+                                DeleteEntity(NetToObj(spatula_net))
+                                spatula_net = nil
+                                ClearPedTasks(PlayerPedId())
+                            
+                        end
+
+                        
+                    end
+                end
+            end
+        else
+            Citizen.Wait(1000)
+        end
+    until actionsRemaining == 0
 end
 end)
 
