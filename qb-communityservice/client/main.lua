@@ -78,7 +78,6 @@ end
 
 RegisterNetEvent('qb-communityservice:inCommunityService')
 AddEventHandler('qb-communityservice:inCommunityService', function(actions_remaining)
-	local playerPed = PlayerPedId()
 
 	if isSentenced then
 		return
@@ -88,21 +87,21 @@ AddEventHandler('qb-communityservice:inCommunityService', function(actions_remai
 
 	FillActionTable()
 	ApplyPrisonerSkin()
-	Teleport(playerPed, Config.ServiceLocation)
+	Teleport(PlayerPedId(), Config.ServiceLocation)
 	isSentenced = true
 	communityServiceFinished = false
 
 	while actionsRemaining > 0 and communityServiceFinished ~= true do
 
 
-		if IsPedInAnyVehicle(playerPed, false) then
-			ClearPedTasksImmediately(playerPed)
+		if IsPedInAnyVehicle(PlayerPedId(), false) then
+			ClearPedTasksImmediately(PlayerPedId())
 		end
 
 		Citizen.Wait(20000)
-
-		if GetDistanceBetweenCoords(GetEntityCoords(playerPed), Config.ServiceLocation.x, Config.ServiceLocation.y, Config.ServiceLocation.z) > 45 then
-			Teleport(playerPed, Config.ServiceLocation)
+		print(GetEntityCoords(PlayerPedId()), GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), Config.ServiceLocation.x, Config.ServiceLocation.y, Config.ServiceLocation.z) > 45)
+		if GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), Config.ServiceLocation.x, Config.ServiceLocation.y, Config.ServiceLocation.z) > 45 then
+			Teleport(PlayerPedId(), Config.ServiceLocation)
 				TriggerEvent('chat:addMessage', { args = { _U('judge'), _U('escape_attempt') }, color = { 147, 196, 109 } })
 				TriggerServerEvent('qb-communityservice:extendService')
 				actionsRemaining = actionsRemaining + Config.ServiceExtensionOnEscape
@@ -111,7 +110,7 @@ AddEventHandler('qb-communityservice:inCommunityService', function(actions_remai
 	end
 
 	TriggerServerEvent('qb-communityservice:finishCommunityService', -1)
-	Teleport(playerPed, Config.ReleaseLocation)
+	Teleport(PlayerPedId(), Config.ReleaseLocation)
 	isSentenced = false
 	TriggerServerEvent("qb-clothes:loadPlayerSkin")
 end)
