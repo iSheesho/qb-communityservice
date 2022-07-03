@@ -99,7 +99,7 @@ AddEventHandler('qb-communityservice:inCommunityService', function(actions_remai
 		end
 
 		Citizen.Wait(20000)
-		print(GetEntityCoords(PlayerPedId()), GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), Config.ServiceLocation.x, Config.ServiceLocation.y, Config.ServiceLocation.z) > 45)
+
 		if GetDistanceBetweenCoords(GetEntityCoords(PlayerPedId()), Config.ServiceLocation.x, Config.ServiceLocation.y, Config.ServiceLocation.z) > 45 then
 			Teleport(PlayerPedId(), Config.ServiceLocation)
 				TriggerEvent('chat:addMessage', { args = { _U('judge'), _U('escape_attempt') }, color = { 147, 196, 109 } })
