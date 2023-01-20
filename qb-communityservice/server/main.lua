@@ -131,7 +131,9 @@ end)
 RegisterServerEvent('qb-communityservice:checkIfSentenced')
 AddEventHandler('qb-communityservice:checkIfSentenced', function()
 	local _source = source -- cannot parse source to client trigger for some weird reason
-	local identifier = QBCore.Functions.GetPlayer(_source).PlayerData.citizenid -- get steam identifier
+	local player = QBCore.Functions.GetPlayer(_source)
+	if not player then return end
+	local identifier = player.PlayerData.citizenid -- get steam identifier
 
 		MySQL.Async.fetchAll('SELECT * FROM communityservice WHERE identifier = @identifier', {
 		['@identifier'] = identifier
