@@ -27,8 +27,9 @@ QBCore.Commands.Add("pcomserv", _U('give_player_community'), {{name = "id", help
     local Player = QBCore.Functions.GetPlayer(source)
 
     local job = Player.PlayerData.job.name
+	local jobType = Player.PlayerData.job.type
 
-    if job == Config.PoliceJobName then
+    if job == Config.PoliceJobName or jobType == Config.PoliceJobName then
 
 	    if args[1] and GetPlayerName(args[1]) ~= nil and tonumber(args[2]) then
 
